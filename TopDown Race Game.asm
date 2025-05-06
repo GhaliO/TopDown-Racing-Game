@@ -10,13 +10,14 @@
 #You have 3 lives every time you collide with object on road. 
 #You can see your life bar at the top once it runs out, GAME OVER!
 #Try to pick up space crystal to refuel!
-#You are on a spaceship and you need to avoid the obstacles on the road! GOODLUCK!
+#You are on a spaceship and you need to avoid the obstacles on the road! 
+#GOODLUCK!
 ######################################################################
 
 #############################################
 #first part is for the game speed settings
-#game levels
-#game limits
+#game levels it gets harder as time elapses
+#game limits - you only get 12 life booster crystals at maz
 #screen dimensions
 #########################
 .eqv	slow_sp 		0
@@ -75,7 +76,7 @@ game_over_msg: .asciiz "Game Over, YOU LOST! Run to try again\n"
 	crystals_pos:			.word 0, -crystal_height
 	#to check if game over 
 	game_over_state: 	.word 0
-	space_state: 		.word 0 # Ranges from 0-5
+	space_state: 		.word 0 
 
 .data		
 # this section defines visual data using 32-bit color values (0xRRGGBB) for display.
@@ -125,7 +126,6 @@ game_over_msg: .asciiz "Game Over, YOU LOST! Run to try again\n"
 	0x263238,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0x000000 ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0xdda0dd,0xdda0dd ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0x000000 ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x263238,
 	0x263238,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0xba55d3 ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0xdda0dd,0xdda0dd ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0xba55d3 ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x263238,
 	0x263238,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0xba55d3 ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0xdda0dd,0xdda0dd ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000, 0xba55d3 ,0x000000,0x000000,0x000000,0x000000,0x000000,0x000000,0x263238,
-
 						
 alien_data:
     .word 0x000000, 0x800080, 0x800080, 0x800080, 0x000000     
@@ -154,7 +154,8 @@ crystals_data:  .word
 .text
 .globl main
 
-main: 		j game_loop
+main: 		
+j game_loop
 game_over: 
 	li $v0, 4
 	la $a0, game_over_msg
@@ -163,7 +164,7 @@ game_over:
 	li $v0, 10
 	syscall
 
-	jal draw_buffer_to_gp 		
+	jal render_frame 		
 
 update:	
 	jal sleep	
@@ -407,23 +408,23 @@ draw_meteor2_end:
 	draw_crystals_end:
 
 	jal draw_crystal 	
-	jal draw_buffer_to_gp 	
+	jal render_frame 	
 	
 	lw $ra, 0($sp)   	
  	addi $sp, $sp, 4 	
 	j return
 #for double buffering:
-draw_buffer_to_gp:
+render_frame:
 	lw $t0, displayAddress 		
 	lw $t1, displayAddressEnd 
 	la $t2, bufferDisplay
-draw_buffer_to_gp_loop:
+render_frame_loop:
 	bgt $t0, $t1, return 	
 	lw $t3, 0($t2)	 	
 	sw $t3, 0($t0) 	 	
 	addi $t0, $t0, 4 	
 	addi $t2, $t2, 4 	
-	j draw_buffer_to_gp_loop
+	j render_frame_loop
 
 draw_full_display: 
 	la $t0, bufferDisplay 			
@@ -646,4 +647,5 @@ keycode_d:
 Exit:
     li   $v0, 10
     syscall
+	
 	
